@@ -4,7 +4,8 @@ import Cart from "./components/Cart/Cart";
 import Layout from "./components/Layout/Layout";
 import Products from "./components/Shop/Products";
 import Notification from "./components/UI/Notifications";
-import { uiActions } from "./store/ui-slice";
+// import { uiActions } from "./store/ui-slice";
+import { sendCartData, fetchCartData } from "./store/cart-actions";
 
 let isIntial = true;
 
@@ -14,51 +15,70 @@ function App() {
   const notification = useSelector((state) => state.ui.notification);
   const dispatch = useDispatch();
 
+  /***** This code is for handling async data using component */
+
+  // useEffect(() => {
+  //   const sendCartData = async () => {
+  //     dispatch(
+  //       uiActions.showNotification({
+  //         status: "pending",
+  //         title: "Sending...",
+  //         message: "Sending cart data...",
+  //       })
+  //     );
+
+  //     const response = await fetch(
+  //       "https://moives-app-default-rtdb.firebaseio.com/cart.json",
+  //       {
+  //         method: "PUT",
+  //         body: JSON.stringify(cart),
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error("Sending cart data failed");
+  //     }
+
+  //     dispatch(
+  //       uiActions.showNotification({
+  //         status: "success",
+  //         title: "Success...",
+  //         message: "Sent cart data successfully!",
+  //       })
+  //     );
+  //   };
+
+  //   if (isIntial) {
+  //     isIntial = false;
+  //     return;
+  //   }
+
+  //   sendCartData().catch((error) => {
+  //     dispatch(
+  //       uiActions.showNotification({
+  //         status: "error",
+  //         title: "Error...",
+  //         message: "Sending cart data failed!",
+  //       })
+  //     );
+  //   });
+  // }, [cart, dispatch]);
+
+  /** This code is for handling async requests using Action Thunks*/
+
   useEffect(() => {
-    const sendCartData = async () => {
-      dispatch(
-        uiActions.showNotification({
-          status: "pending",
-          title: "Sending...",
-          message: "Sending cart data...",
-        })
-      );
+    dispatch(fetchCartData());
+  }, [dispatch]);
 
-      const response = await fetch(
-        "https://moives-app-default-rtdb.firebaseio.com/cart.json",
-        {
-          method: "PUT",
-          body: JSON.stringify(cart),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Sending cart data failed");
-      }
-
-      dispatch(
-        uiActions.showNotification({
-          status: "success",
-          title: "Success...",
-          message: "Sent cart data successfully!",
-        })
-      );
-    };
-
+  useEffect(() => {
     if (isIntial) {
       isIntial = false;
       return;
     }
 
-    sendCartData().catch((error) => {
-      dispatch(
-        uiActions.showNotification({
-          status: "error",
-          title: "Error...",
-          message: "Sending cart data failed!",
-        })
-      );
-    });
+    if (cart.changed) {
+      dispatch(sendCartData(cart));
+    }
   }, [cart, dispatch]);
 
   return (
